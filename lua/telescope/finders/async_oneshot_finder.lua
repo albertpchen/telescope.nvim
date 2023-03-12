@@ -6,7 +6,7 @@ local make_entry = require "telescope.make_entry"
 
 local await_count = 1000
 
-return function(opts)
+local function fn(opts)
   opts = opts or {}
 
   local entry_maker = opts.entry_maker or make_entry.gen_from_string(opts)
@@ -31,8 +31,12 @@ return function(opts)
     end,
     results = results,
     entry_maker = entry_maker,
+    cwd = cwd,
+    change = function(newOpts)
+      return fn(vim.tbl_extend("force", opts, newOpts))
+    end
   }, {
-    __call = function(_, prompt, process_result, process_complete)
+    __call = function(opts, prompt, process_result, process_complete)
       if not job_started then
         local job_opts = fn_command()
 
@@ -48,7 +52,7 @@ return function(opts)
         job = async_job.spawn {
           command = job_opts.command,
           args = job_opts.args,
-          cwd = cwd,
+          cwd = opts.cwd,
           env = env,
 
           stdout = stdout,
@@ -102,3 +106,4 @@ return function(opts)
     end,
   })
 end
+return fn

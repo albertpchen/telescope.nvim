@@ -4,7 +4,7 @@ local LinesPipe = require("telescope._").LinesPipe
 local make_entry = require "telescope.make_entry"
 local log = require "telescope.log"
 
-return function(opts)
+local function fn(opts)
   log.trace("Creating async_job:", opts)
   local entry_maker = opts.entry_maker or make_entry.gen_from_string(opts)
 
@@ -78,7 +78,13 @@ return function(opts)
         job:close(true)
       end
     end,
+    entry_maker = entry_maker,
+    cwd = opts.cwd,
+    change = function(newOpts)
+      return fn(vim.tbl_extend("force", opts, newOpts))
+    end
   }, {
     __call = callable,
   })
 end
+return fn

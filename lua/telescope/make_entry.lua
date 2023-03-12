@@ -194,15 +194,24 @@ do
     end
 
     if opts.file_entry_encoding then
-      return function(line)
+      raw = function(line)
         line = vim.iconv(line, opts.file_entry_encoding, "utf8")
         return setmetatable({ line }, mt_file_entry)
       end
     else
-      return function(line)
+      raw = function(line)
         return setmetatable({ line }, mt_file_entry)
       end
     end
+    return setmetatable({
+      change = function(newOpts)
+        return make_entry.gen_from_file(vim.tbl_extend("force", opts, newOpts))
+      end
+    }, {
+      __call = function (opts, line)
+        return raw(line)
+      end
+    })
   end
 end
 
@@ -367,9 +376,15 @@ do
       end,
     }
 
-    return function(line)
-      return setmetatable({ line }, mt_vimgrep_entry)
-    end
+    return setmetatable({
+      change = function(newOpts)
+        return make_entry.gen_from_vimgrep(vim.tbl_extend("force", opts, newOpts))
+      end
+    }, {
+      __call = function(line)
+        return setmetatable({ line }, mt_vimgrep_entry)
+      end
+    })
   end
 end
 
