@@ -381,7 +381,7 @@ do
         return make_entry.gen_from_vimgrep(vim.tbl_extend("force", opts, newOpts))
       end
     }, {
-      __call = function(line)
+      __call = function(opts, line)
         return setmetatable({ line }, mt_vimgrep_entry)
       end
     })
